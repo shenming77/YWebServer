@@ -29,7 +29,7 @@ void LFUTimer::doWork(int id) {
     if(time_.empty() || ref_.count(id) == 0) {
         return;
     }
-    auto node = *ref_[id];
+    auto&& node = std::move(*ref_[id]);
     node.cb();
     time_[node.expires].erase(ref_[node.id]);
     ref_.erase(node.id);
@@ -48,7 +48,7 @@ void LFUTimer::tick() {
         return ;
     }
     while(!time_.empty()) {
-        auto node = time_.begin()->second.front();
+        auto&& node = std::move(time_.begin()->second.front());
         if(std::chrono::duration_cast<MS>(node.expires - Clock::now()).count() > 0) { 
             break; 
         }
@@ -60,7 +60,7 @@ void LFUTimer::tick() {
 }
 
 void LFUTimer::pop() {
-    auto node = time_.begin()->second.front();
+    auto&& node = std::move(time_.begin()->second.front());
     node.cb();
     time_[node.expires].pop_front();
     ref_.erase(node.id);
